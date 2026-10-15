@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "Boji V2.1 Preview",
+  "short_name": "Boji Preview",
+  "description": "Local-first training companion — 隔离预览版（非商业测试 / 小范围验收）。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F4ED",
+  "theme_color": "#FFF7F9",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "assets/boji/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/boji/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
