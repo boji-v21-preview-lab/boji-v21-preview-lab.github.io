@@ -447,7 +447,7 @@ const KB = [
   { q:"谢谢你", a:"不用谢啦~ 看着你一点点变强，我也很开心(｡･ω･｡)ﾉ\n下次练完记得来告诉我，我等着听好消息。", k:["谢谢", "感谢", "多谢"] },
   { q:"晚安", a:"晚安呀，睡前少刷会儿手机，灯光调暗会更容易入睡。\n*[B] 证据：睡眠不足会让肌肉合成与恢复打折*", k:["晚安", "睡觉", "睡了", "good night"] },
   { q:"早上好", a:"早！先喝杯水补上夜里的水分，昨晚睡得怎么样？\n睡够的话状态会明显不同；没睡够今天就把强度降一档。", k:["早上好", "早安", "morning", "起床"] },
-  { q:"你是谁", a:"我是你的训练伙伴——你可以在“我的”页设置称呼。\n我会协助训练和记录，并区分已核验信息与来源待核内容；不确定时会明确告诉你。", k:["你是谁", "你叫什么", "自我介绍", "介绍下你"],
+  { q:"你是谁", a:"我是你的训练伙伴——你可以在“我的”页设置称呼。\n我会陪你训练和记录，遇到不确定的地方会直接告诉你。", k:["你是谁", "你叫什么", "自我介绍", "介绍下你"],
     more:"技术上我是 App 内的规则＋知识库助手，不联网编造，也不会把你的数据传出去。" },
   { q:"你会生气吗", a:"不会真的生气，但你偷懒的时候我会委屈地蹭过来提醒你一下(｡•́︿•̀｡)\n放心，我永远不用打击的方式督促你。", k:["生气", "会生气", "发脾气", "骂我"] },
   { q:"讲个笑话", a:"健身界最好笑的一句话：「我从明天开始减肥」。\n……所以今天这顿先记一笔？拍照我帮你估~(›´ω`‹ )", k:["笑话", "讲个笑话", "逗我", "搞笑"] },
@@ -724,7 +724,7 @@ function bojiReply(text){
   if(m.item && m.score>0){ const ans=m.item.a + (m.item.more ? '\n（回我“再详细点”，我展开讲）' : '');
     CTX.lastItem=m.item; CTX.lastQ=raw; CTX.turns++; ctxPush(raw, ans); return ans; }
   // 4) 寒暄
-  if(/你好|hi|在吗|在呢|嗨/.test(q)){ const a=`你好呀，我是${coachName()}，你的训练伙伴(｡･ω･｡)ﾉ\n我会区分已核验的信息和来源待核的内容；不确定时会明确告诉你。`; ctxPush(raw,a); return a; }
+  if(/你好|hi|在吗|在呢|嗨/.test(q)){ const a=`你好呀，我是${coachName()}，你的训练伙伴(｡･ω･｡)ﾉ\n聊到不确定的地方，我会直接告诉你。`; ctxPush(raw,a); return a; }
   // 5) 兜底：不装懂
   const nm=coachName();
   const fb=`嗯…这个问题我不想拍脑袋就答你，怕误导 ${'(>_<)'}\n` +
@@ -1959,7 +1959,7 @@ function updateDockState(tab){
 }
 function goModule(name){
   const transitionStarted=runtimeNow();
-  const titles={training:['训练','学习动作，或进入今天的训练'],boji:['Boji','记录与陪伴都在这里'],progress:['进步','训练规律、力量记录与趋势'],data:['进步','训练规律、力量记录与趋势'],profile:['我的','档案与设置'],diet:['饮食记录','已确认的餐点与营养记录'],run:['跑步','记录路线、距离与时间'],knowledge:['训练知识','有来源边界的训练与营养问答']};
+  const titles={training:['训练','今天练什么'],boji:['Boji','训练与陪伴'],progress:['进步','看看自己的变化'],data:['进步','看看自己的变化'],profile:['我的','个人档案与设置'],diet:['饮食记录','已确认的餐点与营养记录'],run:['跑步','记录路线、距离与时间'],knowledge:['训练知识','有来源边界的训练与营养问答']};
   if(name==='today'){
     updateDockState('today');ACTIVE_MODULE='today';renderHome();
     if($('#module').classList.contains('open'))closePanel('module');
@@ -1990,10 +1990,10 @@ function renderHome(){
   const hour=now.getHours();
   const salutation=hour<11?'早上好':hour<18?'下午好':'晚上好';
   const titleEl=$('#hg-title');
-  if(titleEl)titleEl.textContent=`${salutation}！今天也加油吧♡`;
+  if(titleEl)titleEl.textContent=t==='rest'?`${salutation}，今天好好休息。`:`${salutation}，今天练${PLANS[t].name.split('·')[0].trim()}。`;
   const greeting=ACTIVE_WORKOUT&&ACTIVE_WORKOUT.session.status==='ACTIVE'
-    ?'你有一节训练还在进行，已保存的组会保留。'
-    :t==='rest'?'今天安排为休息日，恢复也属于训练计划。':'今天的训练安排来自你当前选择的训练方案。';
+    ?'上一节训练还在继续，接着练就好。'
+    :t==='rest'?'放松一下，恢复也是训练的一部分。':'和 Boji 一起，慢慢完成今天的训练。';
   $('#home-greeting').querySelector('span:last-child').textContent=greeting;
   const weekStart=new Date(now);weekStart.setHours(0,0,0,0);weekStart.setDate(weekStart.getDate()-weekStart.getDay());
   const weekDates=Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(d.getDate()+i);return d;});
@@ -2008,25 +2008,23 @@ function renderHome(){
     <div class="home-week-days" role="group" aria-label="本周完成训练情况">${weekDates.map((date,i)=>{
       const key=BojiData.localDateKey(date),done=completedDays.has(key),selected=key===todayKey(),planned=getDayType(date.getDay())!=='rest';
       return `<span class="home-week-day${done?' done':''}${selected?' today':''}${planned?' planned':''}" aria-label="${key}${done?' 已完成训练':planned?' 计划训练':' 休息日'}"><i>${done?'✓':planned?'·':''}</i><b>${weekdayLabels[i]}</b></span>`;
-    }).join('')}</div><small class="home-week-note">按已完成并保存的训练日统计</small>`;
+    }).join('')}</div>`;
   const ht = $('#home-today');
   if(t==='rest'){
-    ht.innerHTML = `<div class="hc-head"><span class="hc-ic" aria-hidden="true">🌿</span><div><b>今天安排休息</b><span>按你当前选择的每周训练安排</span></div></div>
-      <p class="hc-sub">今天的日历安排为休息日。你可以查看其他训练日，或按自己的状态安排轻松活动。</p>
+    ht.innerHTML = `<div class="hc-head"><span class="hc-ic" aria-hidden="true">🌿</span><div><b>给身体一点时间</b><span>今天是休息日</span></div></div>
+      <p class="hc-sub">散散步、伸展一下也很好。</p>
       <button class="hc-go hc-go-lg" id="hc-go">查看训练 <span aria-hidden="true">→</span></button>
-      <p class="boji-note"><b>Boji：</b>你选择的${esc(planSetMeta().name)}方案把今天列为休息日。</p>
-       <details class="today-why" id="home-why"><summary>为什么今天安排休息？</summary><p>本周计划按你选择的训练方案和星期安排显示。今天对应休息日，训练记录不会因此增加。</p></details>`;
+      `;
     $('#hc-go').onclick=()=>goModule('training');
   } else {
     const plan = PLANS[t];
     const todayTpl=trainingTemplate('template:'+planProfileForDate(todayKey())+':'+t);
     const est=todayTpl?templateMinutes(todayTpl):0;
-    ht.innerHTML = `<div class="hc-head"><span class="hc-ic" aria-hidden="true">💪</span><div><b>${esc(plan.name)}</b><span>今天的训练安排</span></div></div>
-      <p class="hc-meta">🔥 ${plan.ex.length} 个动作${est?` · 约 ${est} 分钟`:''}</p>
-      <div class="hc-chips">${plan.ex.slice(0,4).map(e=>`<span class="hc-chip">${esc(e.name)}</span>`).join('')}${plan.ex.length>4?`<span class="hc-chip more">+${plan.ex.length-4}</span>`:''}</div>
+    ht.innerHTML = `<div class="hc-head"><span class="hc-ic" aria-hidden="true">💪</span><div><b>${esc(plan.name)}</b><span>今天的训练</span></div></div>
+      <p class="hc-meta">${plan.ex.length} 个动作${est?` · 约 ${est} 分钟`:''}</p>
+      <div class="hc-chips">${plan.ex.slice(0,2).map(e=>`<span class="hc-chip">${esc(e.name)}</span>`).join('')}${plan.ex.length>2?`<span class="hc-chip more">还有 ${plan.ex.length-2} 个动作</span>`:''}</div>
       <button class="hc-go hc-go-lg" id="hc-go">开始训练 <span aria-hidden="true">→</span></button>
-      <p class="boji-note"><b>Boji：</b>${esc(planSetMeta().name)}按星期安排今天的${esc(plan.name)}；进度只会在训练组保存后更新。</p>
-       <details class="today-why" id="home-why"><summary>为什么今天练这个？</summary><p>这是你当前训练方案按星期安排的内容。系统没有根据缺少的档案或 AI 生成新计划。</p></details>`;
+      `;
     $('#hc-go').onclick = ()=>goModule('training');
   }
   const adjust=$('#home-adjust');if(adjust)adjust.onclick=()=>{STATE.selDate=todayKey();save();goModule('training');};
@@ -2044,7 +2042,7 @@ function renderHome(){
    改成只替换标记本身，正文原样保留。 */
 function md(s){
   return esc(s)
-    .replace(/\*\[([ABC])\]([^*]*)\*/g, (_, _lv, txt) => `<span class="ev">来源待核</span>${txt}`)
+    .replace(/\*\[([ABC])\]([^*]*)\*/g, (_, _lv, txt) => `<span class="ev">参考信息</span>${txt}`)
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
 }
 function addMsg(role,text){
@@ -2054,7 +2052,7 @@ function addMsg(role,text){
 function renderAssistant(){
   const chat=$('#chat');
   if(chat.childElementCount===0){
-    addMsg('bot',`你好呀，我是${coachName()}，你的训练伙伴(｡･ω･｡)ﾉ\n我会区分已核验的信息和来源待核的内容；不确定时会明确告诉你。`);
+    addMsg('bot',`你好呀，我是${coachName()}，你的训练伙伴(｡･ω･｡)ﾉ\n聊到不确定的地方，我会直接告诉你。`);
   }
   const quick=$('#quick');
   quick.innerHTML='';
@@ -2478,21 +2476,19 @@ function bondProgress(){
 function renderBoji(body){
   const bond=bondProgress();
   body.innerHTML=`<section class="boji-hero card" data-character-family="adult" data-character-state="neutral" data-character-slots="master-portrait workout-full-body icon chibi-base" data-character-states="neutral happy encourage focused proud concerned tired sleep">
-      <div class="boji-art-frame"><img class="boji-portrait" data-character-slot="master-portrait" data-asset-status="final" src="${BOJI_PORTRAIT}" alt="Boji 原创训练伙伴立绘"><div class="boji-say">有我在，我们会一起变强哦！</div></div>
-      <div class="boji-hero-copy"><span class="eyebrow">训练伙伴 · 角色形象</span><h2>Boji 在这里</h2><p>记录训练、饮食与身体变化；建议会说明依据。</p></div>
-      <div class="boji-bond"><span class="bb-heart" aria-hidden="true">❤</span><div class="bb-main"><b>亲密度 Lv.${bond.level}</b><span class="bb-bar" role="img" aria-label="亲密度进度"><i style="width:${bond.pct}%"></i></span><small>${bond.into} / ${bond.span} · 随已完成训练增长</small></div></div>
+      <div class="boji-art-frame"><img class="boji-portrait" data-character-slot="master-portrait" data-asset-status="final" src="${BOJI_PORTRAIT}" alt="Boji"><div class="boji-say">今天也陪你一起练。</div></div>
+      <div class="boji-hero-copy"><span class="eyebrow">你的训练伙伴</span><h2>Boji 在这里</h2><p>想聊聊训练，还是先看看今天的安排？</p></div>
+      <div class="boji-bond"><span class="bb-heart" aria-hidden="true">❤</span><div class="bb-main"><b>亲密度 Lv.${bond.level}</b><span class="bb-bar" role="img" aria-label="亲密度进度"><i style="width:${bond.pct}%"></i></span><small>一起完成了 ${bond.sessions} 次训练</small></div></div>
     </section>
-    <section class="card boji-primary-card"><h3>记录与变化</h3><div class="boji-primary-actions">
+    <section class="card boji-chat-card"><p>有问题，随时来找我。</p><button type="button" class="btn-grad" data-boji-action="ask">和 Boji 聊聊</button></section>
+    <section class="card boji-primary-card"><h3>顺手记一笔</h3><div class="boji-primary-actions">
       <button type="button" class="boji-main-action" data-boji-action="food"><span aria-hidden="true">🍽️</span><b>记录饮食</b><small>拍照或手动添加</small></button>
       <button type="button" class="boji-main-action" data-boji-action="run"><span aria-hidden="true">🏃</span><b>开始跑步</b><small>记录路线与时间</small></button>
       <button type="button" class="boji-main-action" data-boji-action="weight"><span aria-hidden="true">⚖</span><b>记录体重</b><small>更新身体趋势</small></button>
     </div><button type="button" class="boji-scan-link" data-boji-action="barcode"><span aria-hidden="true">▥</span> 扫食品条码</button></section>
     <section class="boji-secondary-actions" aria-label="伙伴互动">
-      <button type="button" data-boji-action="ask"><span aria-hidden="true">✦</span><b>问 Boji</b><small>训练、营养与生活</small></button>
-      <button type="button" data-boji-action="photo"><span aria-hidden="true">📷</span><b>Photo Pet</b><small>用自己的照片做伙伴</small></button>
+      <button type="button" data-boji-action="photo"><span aria-hidden="true">📷</span><b>照片伙伴</b><small>使用自己的照片</small></button>
     </section>
-    <section class="card boji-photo-note"><h3>伙伴形象</h3><p>Boji 角色与 Photo Pet 分开保存。Photo Pet 图片只保存在本机，可以随时替换或移除。</p><button class="ex-do ghost-btn" data-boji-action="photo">管理 Photo Pet</button></section>
-    ${bojiAssetStatusHtml()}
     <p class="boji-signoff">今天也辛苦了！记得喝水和拉伸哦～</p>`;
   body.querySelectorAll('[data-boji-action]').forEach(button=>button.onclick=()=>{
     const action=button.dataset.bojiAction;
@@ -2646,7 +2642,7 @@ function progressOverviewSection(){
   const rate=plannedDays&&hasCompletedHistory?Math.round(doneDays.size/plannedDays*100):null;
   const e1=e1rmOverview(), st=streak();
   const trend=progressTrendBuckets(progressRange);
-  const trendLine=trend.hasRecords?`${trend.label}共完成 ${trend.rows.reduce((sum,row)=>sum+row.count,0)} 次训练。只统计已完成并保存的训练。`:'保存并完成训练后，这里会按实际训练记录显示趋势。';
+  const trendLine=trend.hasRecords?`${trend.label}完成 ${trend.rows.reduce((sum,row)=>sum+row.count,0)} 次训练。`:'还没有训练记录，开始训练后就能看到变化。';
   const weekStart=new Date();weekStart.setHours(0,0,0,0);weekStart.setDate(weekStart.getDate()-6);const weekKey=BojiData.localDateKey(weekStart);
   const thisWeek=WORKOUT_HISTORY_RECORDS.filter(row=>row&&row.session&&row.session.status==='COMPLETED'&&row.session.localDateKey>=weekKey&&row.session.localDateKey<=todayKey());
   const weekSets=thisWeek.reduce((sum,row)=>sum+(row.sets||[]).filter(set=>set&&set.completed===true).length,0);
@@ -2657,14 +2653,14 @@ function progressOverviewSection(){
   const calWeekPlanned=calendarWeekPlannedDays();
   const rollingDays=new Set(thisWeek.map(row=>row.session.localDateKey)).size;
   const highlight=calWeekRecords.length
-    ? `本周（日历周 ${cal.startKey} 起）完成 ${calWeekDays} / ${calWeekPlanned} 天；近 7 天（滚动）记录了 ${rollingDays} 天训练，保存 ${weekSets} 组。`
-    : `本周（日历周）还没有已完成的训练；完成并保存后，这里会显示本周记录。近 7 天（滚动）记录了 ${rollingDays} 天。`;
+    ? `本周完成 ${calWeekDays} / ${calWeekPlanned} 天；近 7 天练了 ${rollingDays} 天，共完成 ${weekSets} 组。`
+    : `这周还没有训练记录，练完后再回来看看自己的变化吧。`;
   const sign=v=>v==null?'':(v>0?'+':'');
   const ranges=[['week','周'],['month','月'],['quarter','3个月'],['all','全部']];
   section.innerHTML=`<div class="card progress-trend"><div class="pt-head"><h3>总体趋势</h3><div class="progress-ranges" role="group" aria-label="趋势时间范围">${ranges.map(([key,label])=>`<button type="button" data-progress-range="${key}" class="${progressRange===key?'active':''}" aria-pressed="${progressRange===key}">${label}</button>`).join('')}</div></div><p class="pt-line">${esc(trendLine)}</p>
       ${progressTrendSvg(trend)}</div>
     <div class="metric-grid">
-      <div class="metric-card"><span class="mc-ic" aria-hidden="true">💪</span><b>${e1.value!=null?esc(e1.value)+' kg':'—'}</b><span>${e1.exerciseName?esc(e1.exerciseName)+' · e1RM 估算':'e1RM 估算 · 尚无动作记录'}</span><em class="${e1.delta>0?'up':e1.delta<0?'down':''}">${e1.delta==null?(e1.exerciseName?'同动作再记录一次可比较':'等待记录'):'同动作 '+sign(e1.delta)+e1.delta+'%'}</em></div>
+      <div class="metric-card"><span class="mc-ic" aria-hidden="true">💪</span><b>${e1.value!=null?esc(e1.value)+' kg':'—'}</b><span>${e1.exerciseName?esc(e1.exerciseName)+' · 力量估算':'力量估算 · 还没有记录'}</span><em class="${e1.delta>0?'up':e1.delta<0?'down':''}">${e1.delta==null?(e1.exerciseName?'同动作再记录一次可比较':'开始记录后就能看到变化'):'同动作 '+sign(e1.delta)+e1.delta+'%'}</em></div>
       <div class="metric-card"><span class="mc-ic" aria-hidden="true">⚖</span><b>${latestW?esc(latestW.w)+' kg':'—'}</b><span>体重</span><em class="${wDelta>0?'up':wDelta<0?'down':''}">${wDelta==null?'未记录变化':sign(wDelta)+wDelta+' kg'}</em></div>
       <div class="metric-card"><span class="mc-ic" aria-hidden="true">✅</span><b>${rate!=null?rate+'%':'—'}</b><span>训练完成率</span><em>近 4 周计划日</em></div>
       <div class="metric-card"><span class="mc-ic" aria-hidden="true">🔥</span><b>${hasCompletedHistory?st+' 天':'—'}</b><span>连续训练</span><em>${hasCompletedHistory?'已保存组':'暂无训练记录'}</em></div>
@@ -2684,7 +2680,7 @@ function progressWorkoutHistorySection(){
     }).join('')||'<div class="wh-set wh-empty">无已保存组</div>';
     return '<details class="wh-item"><summary><span class="wh-date">'+esc(s.localDateKey||'日期未知')+'</span><span class="wh-tag '+statusCls[s.status]+'">'+(statusText[s.status]||esc(s.status)||'未知')+'</span><span class="wh-count">'+saved.length+' 组已保存</span></summary><div class="wh-detail">'+setHtml+'<small class="wh-sid">会话 '+esc(s.sessionId||'')+'</small></div></details>';
   }).join('');
-  section.innerHTML='<h3>训练历史</h3><p class="provenance-note">已完成、已放弃与进行中的训练都会列出；已放弃训练保留已保存的组，可在此查看，不会算作完成。</p>'+(records.length?rows:'<p>还没有训练记录。</p>');
+  section.innerHTML='<h3>训练历史</h3>'+(records.length?'<p class="provenance-note">每次训练都会留在这里。</p>'+rows:'<p>完成第一次训练后，你的记录会留在这里。</p>');
   return section;
 }
 function refreshProgressSurface(body){
@@ -2831,7 +2827,7 @@ function planPreviewHtml(plan, heading, mode){
       startLoad+modeContent+videoContent+'</div>';
   }).join('');
   return '<div class="card plan-preview"><h4>'+esc(heading)+' <span class="tag">'+rows.length+' 个动作</span></h4>'+
-    '<p class="plan-preview-note">以下是这个训练日的计划动作与要点，先熟悉再开始；只有开始训练并保存组后才会计入进度。</p>'+items+'</div>';
+    '<p class="plan-preview-note">先熟悉动作，再开始训练。</p>'+items+'</div>';
 }
 /* G4-R3：已确认调整（planOverrides）后，「计划动作」预览必须与随后真实训练同源——
    动作身份取 override.templateId 的目录模板，组数/次数/休息取 override.prescriptionOverrides，
@@ -2912,8 +2908,8 @@ function renderTraining(body){
         mode==='learning'?learningContent:'<details class="learning-details"><summary>动作教学与安全</summary>'+learningContent+'</details>';
       const videoContent=workoutVideoHtml(video, def&&def.name);
       const videoPlayEntry=!!(video&&video.sourceUrl&&!isHoldVideoUrl(video.sourceUrl));
-      const demoContent=current?'<div class="exercise-demo"><div class="exercise-demo-art"><span aria-hidden="true">'+(videoPlayEntry?'有来源':(video&&video.sourceUrl?'暂缓':'无视频'))+'</span><small>演示状态</small></div><div class="exercise-demo-copy"><b>动作演示与要点</b><p>'+
-        (videoPlayEntry?('教学媒体'+esc(mediaStatusZh(video.matchLevel,video.availability))+'，匹配情况仍待核验。'):(video&&video.sourceUrl?'暂无合适的动作演示，按上面的动作要点练习即可。':'当前没有已验证的视频素材；动作要点可离线查看。'))+
+      const demoContent=current?'<div class="exercise-demo"><div class="exercise-demo-art"><span aria-hidden="true">动作</span><small>小提示</small></div><div class="exercise-demo-copy"><b>动作演示与要点</b><p>'+
+        (videoPlayEntry?'可以参考动作示范，也可以先看下面的动作要点。':(video&&video.sourceUrl?'跟着动作要点练习就好。':'先看动作要点，按自己的节奏练习。'))+
         '</p>'+videoContent+'</div></div>':'';
       const suggestionCopy=!suggestion?'':!suggestion.ready?'尚无足够的已保存同动作组，暂不提供重量建议。':suggestion.kind==='INCREASE_LOAD'?
         '建议重量 '+esc(suggestion.suggestedKg)+' kg · 需要你确认':'保持 '+esc(suggestion.currentKg)+' kg，先逐步达到目标次数';
@@ -4192,8 +4188,8 @@ function applyCoachIdentity(){
   const meta = document.querySelector('.assistant .ph-meta b'); if(meta) meta.textContent = nm;
   const inp = document.getElementById('chat-text'); if(inp) inp.placeholder = `问${nm}任何训练/营养问题…`;
   const ob = document.querySelector('#onboard .sub');
-  if(ob) ob.innerHTML = `我是<b>${esc(nm)}</b>，你的训练伙伴，会陪你记录训练、饮食和恢复。`;
-  const obBtn = document.getElementById('ob-save'); if(obBtn) obBtn.textContent = `开始和${nm}一起练`;
+  if(ob) ob.textContent = `${nm}会陪你记录训练和恢复，今天先从轻松的一步开始。`;
+  const obBtn = document.getElementById('ob-save'); if(obBtn) obBtn.textContent = '保存资料';
 }
 // 设置类大字符串（背景图 dataURL）保存的额度保护：失败要明确告诉用户，不能静默丢数据
 function saveSafe(){
@@ -4209,7 +4205,7 @@ function renderProfile(body){
   body.innerHTML=`<div class="profile-head"><img id="pf-av" src="${avatar}" alt=""><b id="pf-name">${esc(p?(p.name||'训练者'):'训练者')}</b><span>${p?`${p.height}cm · ${p.weight}kg · 哑铃${p.dumbbell}kg`:'未设置档案'}</span>
     <button class="hc-go" id="pf-av-btn">📷 更换头像</button></div>
     <section class="settings-group"><header><span>🏋</span><div><h3>训练与档案</h3><p>训练背景、计划和营养偏好</p></div></header>
-    <details class="sg-body" id="sg-train"><summary class="sg-summary"><span class="sg-caret">⌄</span>展开设置 · 档案、目标与训练方案</summary>
+    <details class="sg-body" id="sg-train"><summary class="sg-summary"><span class="sg-caret">⌄</span>档案与训练方案</summary>
     <div class="card" style="padding:6px 14px">
       <h4 style="margin:8px 0 2px">档案（改完立即生效）</h4>
       <div class="pf-edit">
@@ -4238,8 +4234,8 @@ function renderProfile(body){
     </div>
     </details>
     </section>
-    <section class="settings-group"><header><span>♡</span><div><h3>Boji 与外观</h3><p>角色、Photo Pet、语音和陪伴偏好</p></div></header>
-    <details class="sg-body" id="sg-boji"><summary class="sg-summary"><span class="sg-caret">⌄</span>展开设置 · 角色、外观与陪伴</summary>
+    <section class="settings-group"><header><span>♡</span><div><h3>Boji 与外观</h3><p>角色、照片伙伴和陪伴偏好</p></div></header>
+    <details class="sg-body" id="sg-boji"><summary class="sg-summary"><span class="sg-caret">⌄</span>角色与陪伴</summary>
     <div class="card" style="padding:6px 14px">
       <div class="list-row"><span class="lr-ic">🔥</span>连续打卡<b style="margin-left:auto">${streak()} 天</b></div>
       <div class="list-row"><span class="lr-ic">💧</span>今日饮水<b style="margin-left:auto">${dailyWaterTotal(todayKey())} ml${g.water?' / 估算 '+g.water+' ml':''}</b></div>
@@ -4296,9 +4292,9 @@ function renderProfile(body){
     </details>
     </section>
     <section class="settings-group"><header><span>⊕</span><div><h3>数据与隐私</h3><p>数据状态、备份恢复与 AI 控制</p></div></header>
-    <details class="sg-body" id="sg-data"><summary class="sg-summary"><span class="sg-caret">⌄</span>展开设置 · 数据、备份与 AI</summary>
+    <details class="sg-body" id="sg-data"><summary class="sg-summary"><span class="sg-caret">⌄</span>数据与隐私</summary>
     <div class="card app-tools-card">
-      <div class="list-row" id="profile-health" role="button" tabindex="0"><span class="lr-ic">◉</span>数据健康与诊断<span class="lr-ar">查看 ›</span></div>
+      <div class="list-row" id="profile-health" role="button" tabindex="0"><span class="lr-ic">◉</span>数据和存储情况<span class="lr-ar">查看 ›</span></div>
       <p>记录和来源信息保存在本机；AI 识别仅在启用自建服务端代理时发送请求。</p>
     </div>
     <div class="card" style="padding:6px 14px">
@@ -4332,8 +4328,8 @@ function renderProfile(body){
     </div>
     </details>
     </section>
-    <section class="settings-group"><header><span>▣</span><div><h3>应用</h3><p>PWA、更新、诊断与版本信息</p></div></header>
-    <details class="sg-body" id="sg-app"><summary class="sg-summary"><span class="sg-caret">⌄</span>展开设置 · 关于与更新</summary>
+    <section class="settings-group"><header><span>▣</span><div><h3>应用</h3><p>安装方式、更新和版本</p></div></header>
+    <details class="sg-body" id="sg-app"><summary class="sg-summary"><span class="sg-caret">⌄</span>关于与更新</summary>
     <div class="card app-tools-card">
       <p>应用可添加到主屏幕并像应用一样打开；是否支持安装入口由当前浏览器决定。Boji 不会常驻系统桌面浮窗。</p>
     </div>
@@ -4889,6 +4885,11 @@ function showStorageStatus(){
   notice.textContent=DATA_ERROR||'';notice.hidden=!DATA_ERROR;
 }
 function showOnboard(){ if(STATE.isFirstLaunch){ const el=$('#onboard'); el.classList.add('show'); el.setAttribute('aria-hidden','false'); navOpen('onboard'); el.focus({preventScroll:true}); } }
+$('#ob-skip') && ($('#ob-skip').onclick=()=>{
+  const wasFirstLaunch=STATE.isFirstLaunch;STATE.isFirstLaunch=false;
+  if(!save()){STATE.isFirstLaunch=wasFirstLaunch;toast('暂时无法保存，请稍后再试。');return;}
+  navUIClose('onboard');renderHome();
+});
 $('#ob-save') && ($('#ob-save').onclick=async()=>{
   const h=+$('#ob-h').value, w=+$('#ob-w').value, d=+$('#ob-d').value;
   if(h<140||h>220||w<30||w>200||!d){ toast('身高140-220、体重30-200、哑铃重量必填'); return; }

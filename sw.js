@@ -2,7 +2,7 @@
 // marker so RC and Production have disjoint Cache Storage namespaces.
 const RELEASE_CHANNEL = 'preview';
 const CACHE_PREFIX = `boji-v2-${RELEASE_CHANNEL}-`;
-const CACHE_NAME = `${CACHE_PREFIX}9`;
+const CACHE_NAME = `${CACHE_PREFIX}10`;
 const BASE_URL = new URL('./', self.registration.scope);
 const ASSETS = [
   './', './index.html', './app.js', './data-layer.js', './styles.css',
